@@ -10,11 +10,6 @@ import {
   getCurrentPollWeek,
   POLL_ANSWERS,
 } from "../domain/pollWeek";
-import {
-  isPollStateExpired,
-  loadPollState,
-  savePollState,
-} from "./pollStateStore";
 
 let _client: Client | null = null;
 
@@ -34,9 +29,8 @@ export function setSchedulerClient(client: Client): void {
  * Logic:
  * 1. If no client set, skip
  * 2. Calculate current week
- * 3. Check existing state — skip if valid poll already exists for this week
- * 4. Fetch poll channel — skip if not found
- * 5. Create both polls and save state
+ * 3. Fetch poll channel — skip if not found
+ * 4. Create both polls
  *
  * @returns Promise<[ok: boolean, detail: string]>
  */
@@ -45,12 +39,6 @@ export async function createPollsIfMissing(): Promise<[ok: boolean, detail: stri
   if (!POLL_CHANNEL_ID) return [false, "POLL_CHANNEL_ID is not configured."];
 
   const week = getCurrentPollWeek();
-
-  // Skip if valid poll already exists for this week
-  const existing = await loadPollState();
-  if (existing && existing.weekKey === week.weekKey && !isPollStateExpired(existing, week.now)) {
-    return [false, `Poll for week ${week.weekKey} already exists.`];
-  }
 
   // Fetch the poll channel
   let channel: TextChannel | null = null;
@@ -82,15 +70,6 @@ export async function createPollsIfMissing(): Promise<[ok: boolean, detail: stri
         duration: week.durationHours,
         allowMultiselect: false,
       },
-    });
-
-    // Save state for dedup
-    await savePollState({
-      weekKey: week.weekKey,
-      channelId: channel.id,
-      saturdayMessageId: saturdayPoll.id,
-      sundayMessageId: sundayPoll.id,
-      expiresAt: week.expiresAt.toISOString(),
     });
 
     console.info(`Auto-created polls for week ${week.weekKey} in #${channel.name}`);

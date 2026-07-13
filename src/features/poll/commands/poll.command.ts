@@ -18,11 +18,6 @@ import {
   getCurrentPollWeek,
   POLL_ANSWERS,
 } from "../domain/pollWeek";
-import {
-  isPollStateExpired,
-  loadPollState,
-  savePollState,
-} from "../application/pollStateStore";
 
 /**
  * Build a Discord message URL from guild, channel, and message IDs.
@@ -64,12 +59,10 @@ export const pollCommand: SlashCommandData = new SlashCommandBuilder()
  *
  * Logic:
  * 1. Verify caller has Manage Server permission
- * 2. Check if poll for current week already exists → show links if so
- * 3. Fetch poll channel → error if not text channel
- * 4. Create Saturday poll (2 options: Full / Tham gia sau 8 giờ)
- * 5. Create Sunday poll (same 2 options)
- * 6. Save poll state to JSON for dedup and expiry tracking
- * 7. Reply with links to both polls
+ * 2. Fetch poll channel → error if not text channel
+ * 3. Create Saturday poll (2 options: Full / Tham gia sau 8 giờ)
+ * 4. Create Sunday poll (same 2 options)
+ * 5. Reply with links to both polls
  *
  * @param interaction - The chat input command interaction
  */
@@ -93,29 +86,6 @@ export async function handlePollCreate(
   }
 
   const week = getCurrentPollWeek();
-
-  // Check for existing non-expired poll for this week
-  const existingState = await loadPollState();
-  if (
-    existingState &&
-    existingState.weekKey === week.weekKey &&
-    !isPollStateExpired(existingState, week.now)
-  ) {
-    const saturdayUrl = buildMessageUrl(
-      interaction.guildId,
-      existingState.channelId,
-      existingState.saturdayMessageId,
-    );
-    const sundayUrl = buildMessageUrl(
-      interaction.guildId,
-      existingState.channelId,
-      existingState.sundayMessageId,
-    );
-    await interaction.editReply(
-      `Poll tuần này đã tồn tại:\n- T7: ${saturdayUrl}\n- CN: ${sundayUrl}`,
-    );
-    return;
-  }
 
   // Fetch the poll channel
   const channel = await getPollChannel(interaction);
@@ -145,15 +115,6 @@ export async function handlePollCreate(
         duration: week.durationHours,
         allowMultiselect: false,
       },
-    });
-
-    // Persist poll state for dedup and expiry tracking
-    await savePollState({
-      weekKey: week.weekKey,
-      channelId: channel.id,
-      saturdayMessageId: saturdayPoll.id,
-      sundayMessageId: sundayPoll.id,
-      expiresAt: week.expiresAt.toISOString(),
     });
 
     await interaction.editReply(
