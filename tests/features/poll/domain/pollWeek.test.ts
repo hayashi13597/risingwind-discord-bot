@@ -44,18 +44,14 @@ test("durationHours is at least 1", () => {
   assert.ok(week.durationHours >= 1);
 });
 
-test("buildPollTitle returns T7 prefix for Saturday", () => {
+test("buildPollTitle returns GVG T7 format for Saturday", () => {
   const saturday = new Date(2026, 6, 18, 0, 0, 0);
   const title = buildPollTitle("saturday", saturday);
-  assert.ok(title.startsWith("T7"));
-  assert.ok(title.includes("18/7"));
-  assert.ok(title.endsWith("GVG"));
+  assert.equal(title, "GVG T7 18/7 19H00 Tập trung !");
 });
 
-test("buildPollTitle returns CN prefix for Sunday", () => {
+test("buildPollTitle returns GVG CN format for Sunday", () => {
   const sunday = new Date(2026, 6, 19, 0, 0, 0);
   const title = buildPollTitle("sunday", sunday);
-  assert.ok(title.startsWith("CN"));
-  assert.ok(title.includes("19/7"));
-  assert.ok(title.endsWith("GVG"));
+  assert.equal(title, "GVG CN 19/7 19H00 Tập trung !");
 });

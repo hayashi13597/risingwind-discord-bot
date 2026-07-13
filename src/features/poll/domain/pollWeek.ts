@@ -118,12 +118,12 @@ export function getCurrentPollWeek(now: Date = nowInPollTimezone()): PollWeek {
 
 /**
  * Build the poll title for a given day and date.
- * Format: "T7 19h00 dd/MM GVG" for Saturday, "CN 19h00 dd/MM GVG" for Sunday.
+ * Format: "GVG T7 18/9 19H00 Tập trung !" for Saturday, "GVG CN 19/9 19H00 Tập trung !" for Sunday.
  * @param day - "saturday" or "sunday"
  * @param date - The date of the poll day
  * @returns Formatted poll title string
  */
 export function buildPollTitle(day: PollDay, date: Date): string {
   const prefix = day === "saturday" ? "T7" : "CN";
-  return `${prefix} 19h00 ${date.getDate()}/${date.getMonth() + 1} GVG`;
+  return `GVG ${prefix} ${date.getDate()}/${date.getMonth() + 1} 19H00 Tập trung !`;
 }
