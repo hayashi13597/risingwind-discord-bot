@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "risingwind-bot",
       script: "dist/src/index.js",
-      cwd: "/home/hayashi/risingwind-bot",
+      cwd: "/home/hayashi/risingwind-discord-bot",
       env: {
         NODE_ENV: "production",
       },
