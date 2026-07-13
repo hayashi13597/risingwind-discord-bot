@@ -51,7 +51,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             export PATH="$HOME/.local/share/pnpm:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node)/bin:$HOME/.local/share/pnpm/bin:$PATH"
-            cd /home/hayashi/risingwind-discord-bot
+            cd /home/hayashi/working/risingwind-bot
 
             # Pull latest code
             git pull origin main
