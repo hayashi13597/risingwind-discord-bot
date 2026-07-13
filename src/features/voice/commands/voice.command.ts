@@ -197,13 +197,14 @@ export async function handleJoinCommand(
     return;
   }
 
+  // Defer reply công khai vì coordinator.join() có thể vượt thời hạn 3s
+  // của interaction token — bao gồm entersState() chờ voice ready tới 15s.
+  await interaction.deferReply();
+
   // Yêu cầu coordinator cho bot tham gia voice channel
   const result = await coordinator.join(botKey, interaction.guild.id, target.id);
-  // Phản hồi kết quả: ephemeral nếu thất bại, công khai nếu thành công
-  await interaction.reply({
-    content: result.detail,
-    flags: result.ok ? undefined : MessageFlags.Ephemeral,
-  });
+  // Phản hồi kết quả: công khai (editReply thay thế deferred reply)
+  await interaction.editReply({ content: result.detail });
 }
 
 /**
