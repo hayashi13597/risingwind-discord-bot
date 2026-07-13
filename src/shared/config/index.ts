@@ -23,13 +23,16 @@ const PING_WEEKDAYS_RAW = process.env.PING_WEEKDAYS ?? "0,1,2,3,4";
 const PING_MESSAGE_RAW = process.env.PING_MESSAGE;
 
 /**
- * Default ping message template for weekend GVG notification.
- * Uses {WEEKEND_RANGE} placeholder for auto-calculated Saturday-Sunday date range.
+ * Default ping message for weekend GVG registration.
+ * Uses Discord mentions directly (<#channel>, <@&role>, <@user>) — no placeholders.
  */
 export const DEFAULT_PING_MESSAGE =
-  `📢 THÔNG BÁO GVG CUỐI TUẦN\n\n` +
-  `Anh em vào mục điểm danh GVG cuối tuần này: [ {WEEKEND_RANGE} ]\n\n` +
-  `👉 @everyone điểm danh sớm để G sắp xếp đội hình cho hợp lý.\n`;
+  `🎖️🎖️🎖️ĐĂNG KÝ GVG CUỐI TUẦN🎖️🎖️🎖️\n\n` +
+  `Anh em vào mục <#1461714411361271828>  để điểm danh GVG vào T7 và CN nhé\n\n` +
+  `Anh em <@&1444172594285907989>  điểm danh sớm để còn xếp đội hình và nghe phổ biến thông tin.\n` +
+  `Những anh em nào tham gia trận league đầu phải có mặt tập trung 7g để điểm danh\n` +
+  `Trường hợp ko kịp điểm danh lúc 7g nhưng vẫn vào kịp 7:30 hãy báo <@416841523473416192> hoặc <@584218775184736257> để nắm thông tin\n\n` +
+  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@416841523473416192>  sẽ sắp xếp mọi người lưu phiên vào nhé`;
 
 // ─── Parsing helpers ───────────────────────────────────────
 
@@ -103,8 +106,9 @@ export function resolvePingMessage(value: string | undefined): string {
 }
 
 /**
- * Render ping message by replacing {WEEKEND_RANGE} or [ date - date ] pattern
- * with the calculated Saturday-Sunday date range for the current week.
+ * Render ping message. With the new default template there are no placeholders
+ * to replace, but this function is kept for backward compatibility in case
+ * PING_MESSAGE env override still uses {WEEKEND_RANGE} or [ date - date ].
  * @param template - Message template string
  * @param now - Current date (in configured timezone)
  * @returns Final rendered message
