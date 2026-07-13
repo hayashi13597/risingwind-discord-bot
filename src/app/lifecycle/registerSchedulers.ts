@@ -1,4 +1,4 @@
-import cron from "node-cron";
+import schedule from "node-schedule";
 import type {
   BotContext,
   BotModule,
@@ -16,7 +16,7 @@ export function registerSchedulers(
   modules: BotModule[],
 ): void {
   for (const job of collectScheduledJobs(modules)) {
-    cron.schedule(job.cron, () => {
+    schedule.scheduleJob(job.cron, () => {
       Promise.resolve(job.run(context)).catch((err) =>
         console.error(`Scheduled job failed: ${job.name}`, err),
       );
