@@ -1,31 +1,17 @@
 // src/app/main.ts
 
 import "dotenv/config";
-import cron from "node-cron";
 import type { ChatInputCommandInteraction } from "discord.js";
 import { validateConfig } from "../shared/config";
-import { POLL_CRON_EXPRESSION } from "../features/poll/application/pollScheduler";
-import { setSchedulerClient } from "../features/poll/application/pollScheduler";
-import { createPollsIfMissing } from "../features/poll/application/pollScheduler";
-import {
-  setClient,
-  runScheduledPing,
-} from "../features/notifications/application/pingService";
-import {
-  createSpeakingScheduleRuntime,
-} from "../features/voice/application/speakingSchedule";
-import {
-  createVoiceCoordinator,
-  type VoiceCoordinator,
-} from "../features/voice/application/voiceCoordinator";
+import type { VoiceCoordinator } from "../features/voice/application/voiceCoordinator";
 import { replyEphemeralSafe } from "../shared/discord/interaction";
-import { registerCommands } from "./commandRegistry";
-import { createDiscordClient } from "./discordClient";
-import {
-  handleInteractionCreate,
-  isVoiceCommandInteraction,
-} from "./interactionRouter";
-import { handleMessageCreate } from "./messageRouter";
+import { createBotClients } from "./lifecycle/createClients";
+import { createReadyVoiceCoordinator } from "./lifecycle/createVoiceCoordinator";
+import { registerSchedulers } from "./lifecycle/registerSchedulers";
+import { createEnabledModules } from "./modules";
+import { registerCommands } from "./registry/commandRegistry";
+import { handleInteractionCreate } from "./registry/interactionRouter";
+import { handleMessageCreate } from "./registry/messageRouter";
 
 // Validate env before anything else
 validateConfig();
@@ -35,14 +21,22 @@ validateConfig();
  * Primary: handles all interactions, polls, auto-ban, notifications.
  * Secondary: joins as second voice bot for audio.
  */
-const client = createDiscordClient();
-const secondaryClient = createDiscordClient();
+const { primaryClient: client, secondaryClient } = createBotClients();
 
 /**
  * Voice coordinator — manages primary + secondary audio runtimes.
  * Initialized after both clients are ready (clientReady events).
  */
 let voiceCoordinator: VoiceCoordinator | null = null;
+
+const context = {
+  primaryClient: client,
+  secondaryClient,
+};
+
+let modules = createEnabledModules({
+  getVoiceCoordinator: () => voiceCoordinator,
+});
 
 /** Whether slash commands have been successfully registered. */
 let commandsRegistered = false;
@@ -61,7 +55,10 @@ function syncCommandsWhenCoordinatorReady(): void {
   if (!voiceCoordinator || commandsRegistered || registeringCommands) return;
 
   registeringCommands = true;
-  registerCommands(client, voiceCoordinator.getBotChoices())
+  modules = createEnabledModules({
+    getVoiceCoordinator: () => voiceCoordinator,
+  });
+  registerCommands(client, modules)
     .then(() => {
       commandsRegistered = true;
       if (commandRegistrationRetry) {
@@ -91,20 +88,7 @@ function tryInitVoiceCoordinator(): void {
   if (!client.user || !secondaryClient.user) return;
 
   if (!voiceCoordinator) {
-    voiceCoordinator = createVoiceCoordinator([
-      {
-        key: "primary",
-        label: client.user.displayName ?? client.user.username,
-        runtime: createSpeakingScheduleRuntime(),
-        client,
-      },
-      {
-        key: "secondary",
-        label: secondaryClient.user.displayName ?? secondaryClient.user.username,
-        runtime: createSpeakingScheduleRuntime(),
-        client: secondaryClient,
-      },
-    ]);
+    voiceCoordinator = createReadyVoiceCoordinator(client, secondaryClient);
   }
 
   syncCommandsWhenCoordinatorReady();
@@ -115,53 +99,32 @@ client.once("clientReady", async () => {
   console.info(`Logged in as ${client.user?.tag} (ID: ${client.user?.id})`);
   tryInitVoiceCoordinator();
 
-  // Set the Discord client for notification ping service
-  setClient(client);
-
-  // Set the Discord client for poll auto-scheduler
-  setSchedulerClient(client);
-
-  // Schedule auto poll creation via cron
-  cron.schedule(POLL_CRON_EXPRESSION, () => {
-    createPollsIfMissing().catch((err) =>
-      console.error("Auto poll creation error", err),
-    );
-  });
-
-  // Schedule notification ping check every minute
-  cron.schedule("* * * * *", () => {
-    runScheduledPing().catch((err) =>
-      console.error("Scheduled ping error", err),
-    );
-  });
+  for (const module of modules) {
+    await module.onPrimaryReady?.(context);
+  }
+  registerSchedulers(context, modules);
 });
 
 // ─── Secondary client ready ─────────────────────────────────
-secondaryClient.once("clientReady", () => {
+secondaryClient.once("clientReady", async () => {
   console.info(
     `Logged in secondary bot as ${secondaryClient.user?.tag} (ID: ${secondaryClient.user?.id})`,
   );
+  for (const module of modules) {
+    await module.onSecondaryReady?.(context);
+  }
   tryInitVoiceCoordinator();
 });
 
-// ─── Message handling (auto-ban) ───────────────────────────
+// ─── Message handling ──────────────────────────────────────
 client.on("messageCreate", async (message) => {
-  await handleMessageCreate(client, message);
+  await handleMessageCreate(message, context, modules);
 });
 
 // ─── Interaction handling (slash commands) ─────────────────
 client.on("interactionCreate", async (interaction) => {
   try {
-    // If voice command but coordinator not ready, warn user
-    if (!voiceCoordinator && isVoiceCommandInteraction(interaction)) {
-      await replyEphemeralSafe(
-        interaction as ChatInputCommandInteraction,
-        "Voice bot runtime chưa sẵn sàng, vui lòng thử lại sau.",
-      );
-      return;
-    }
-
-    await handleInteractionCreate(client, interaction, voiceCoordinator);
+    await handleInteractionCreate(interaction, modules);
   } catch (err) {
     console.error("Error handling interaction", err);
     const msg = "Có lỗi xảy ra khi xử lý lệnh này.";
