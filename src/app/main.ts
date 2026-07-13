@@ -36,6 +36,7 @@ const context = {
 
 let modules = createEnabledModules({
   getVoiceCoordinator: () => voiceCoordinator,
+  getModules: () => modules,
 });
 
 /** Whether slash commands have been successfully registered. */
@@ -57,6 +58,7 @@ function syncCommandsWhenCoordinatorReady(): void {
   registeringCommands = true;
   modules = createEnabledModules({
     getVoiceCoordinator: () => voiceCoordinator,
+    getModules: () => modules,
   });
   registerCommands(client, modules)
     .then(() => {
