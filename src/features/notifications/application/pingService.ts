@@ -1,10 +1,11 @@
 // src/features/notifications/application/pingService.ts
 
-import { AllowedMentionsTypes, type Client, TextChannel } from "discord.js";
+import { AllowedMentionsTypes, type Client, type Message, TextChannel } from "discord.js";
 import {
   ALLOWED_PING_TIMES,
   ALLOWED_PING_WEEKDAYS,
   PING_CHANNEL_ID,
+  PING_DEDUP_WINDOW_MS,
   PING_MESSAGE_TEMPLATE,
   PING_TIMEZONE,
   renderPingMessage,
@@ -34,6 +35,25 @@ export function setClient(client: Client): void {
 function nowInTz(tz: string): Date {
   const str = new Date().toLocaleString("en-US", { timeZone: tz });
   return new Date(str);
+}
+
+// ─── Helper: kiểm tra tin nhắn trùng lặp ────────────────────
+/**
+ * Kiểm tra tin nhắn gần nhất trong channel có phải là ping GVG trùng lặp không.
+ * Trả về true nếu tin nhắn chứa marker <!-- GVG_PING --> và được gửi trong
+ * khoảng thời gian dedup window (mặc định 5 phút).
+ * @param lastMessage - Tin nhắn gần nhất trong channel (hoặc null)
+ * @param now - Thời gian hiện tại (timestamp ms)
+ * @returns true nếu trùng lặp gần đây
+ */
+export function isRecentDuplicate(
+  lastMessage: Message | null,
+  now: number,
+): boolean {
+  if (!lastMessage) return false;
+  if (!lastMessage.content?.includes("<!-- GVG_PING -->")) return false;
+  const ageMs = now - lastMessage.createdTimestamp;
+  return ageMs < PING_DEDUP_WINDOW_MS;
 }
 
 // ─── Gửi thông báo ping ────────────────────────────────────
@@ -78,6 +98,20 @@ export async function sendPingNotification(opts: {
 
   // Đảm bảo channel là text channel
   if (!channel) return [false, "Configured channel is not a text channel."];
+
+  // Discord-side dedup: kiểm tra tin nhắn gần nhất có phải ping trùng lặp không
+  try {
+    const messages = await channel.messages.fetch({ limit: 1 });
+    const lastMessage = messages.first() ?? null;
+    if (isRecentDuplicate(lastMessage, Date.now())) {
+      console.info(
+        `Skipped ${source} @everyone ping — duplicate detected in #${channel.name}`,
+      );
+      return [true, `Skipped — duplicate ping already sent within ${PING_DEDUP_WINDOW_MS / 1000}s.`];
+    }
+  } catch {
+    console.warn(`Failed to fetch recent messages for dedup check, proceeding with send`);
+  }
 
   // Gửi thông báo @everyone với tin nhắn đã render
   try {
@@ -129,10 +163,18 @@ export async function runScheduledPing(): Promise<void> {
   const todaySlot = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}_${slotKey}`;
   if (lastPingSlot === todaySlot) return;
 
-  // Gửi thông báo và đánh dấu đã gửi nếu thành công
+  // Optimistic lock: mark slot as sent BEFORE the async send call
+  // to prevent overlapping async re-entry within the same process.
+  // If the send fails, we reset so the next tick can retry.
+  lastPingSlot = todaySlot;
+
   const [sent] = await sendPingNotification({
     now,
     source: "scheduled",
   });
-  if (sent) lastPingSlot = todaySlot;
+
+  if (!sent) {
+    // Send failed — allow retry on next tick
+    lastPingSlot = null;
+  }
 }
