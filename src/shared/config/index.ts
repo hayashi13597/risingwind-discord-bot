@@ -21,6 +21,7 @@ export const PING_TIMEZONE = process.env.PING_TIMEZONE ?? "Asia/Bangkok";
 const PING_TIMES_RAW = process.env.PING_TIMES ?? "20:00";
 const PING_WEEKDAYS_RAW = process.env.PING_WEEKDAYS ?? "0,1,2,3,4";
 const PING_MESSAGE_RAW = process.env.PING_MESSAGE;
+const PING_DEDUP_WINDOW_RAW = process.env.PING_DEDUP_WINDOW_MS;
 
 /**
  * Default ping message for weekend GVG registration.
@@ -32,7 +33,8 @@ export const DEFAULT_PING_MESSAGE =
   `Anh em <@&1444172594285907989>  điểm danh sớm để còn xếp đội hình và nghe phổ biến thông tin.\n` +
   `Những anh em nào tham gia trận league đầu phải có mặt tập trung 7g để điểm danh\n` +
   `Trường hợp ko kịp điểm danh lúc 7g nhưng vẫn vào kịp 7:30 hãy báo <@416841523473416192> hoặc <@584218775184736257> để nắm thông tin\n\n` +
-  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@416841523473416192>  sẽ sắp xếp mọi người lưu phiên vào nhé`;
+  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@416841523473416192>  sẽ sắp xếp mọi người lưu phiên vào nhé` +
+  `\n<!-- GVG_PING -->`;
 
 // ─── Parsing helpers ───────────────────────────────────────
 
@@ -135,6 +137,9 @@ export const PING_CHANNEL_ID = parseChannelId(PING_CHANNEL_ID_RAW);
 export const ALLOWED_PING_WEEKDAYS = parsePingWeekdays(PING_WEEKDAYS_RAW);
 export const ALLOWED_PING_TIMES = parsePingTimes(PING_TIMES_RAW);
 export const PING_MESSAGE_TEMPLATE = resolvePingMessage(PING_MESSAGE_RAW);
+export const PING_DEDUP_WINDOW_MS = PING_DEDUP_WINDOW_RAW
+  ? parseInt(PING_DEDUP_WINDOW_RAW, 10)
+  : 5 * 60 * 1000; // 5 minutes default
 
 /**
  * Validate that all required environment variables are set.
