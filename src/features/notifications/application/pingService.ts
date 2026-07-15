@@ -51,7 +51,7 @@ export function isRecentDuplicate(
   now: number,
 ): boolean {
   if (!lastMessage) return false;
-  if (!lastMessage.content?.includes("<!-- GVG_PING -->")) return false;
+  if (!lastMessage.content?.includes("ĐĂNG KÝ GVG")) return false;
   const ageMs = now - lastMessage.createdTimestamp;
   return ageMs < PING_DEDUP_WINDOW_MS;
 }

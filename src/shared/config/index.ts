@@ -33,8 +33,7 @@ export const DEFAULT_PING_MESSAGE =
   `Anh em <@&1444172594285907989>  điểm danh sớm để còn xếp đội hình và nghe phổ biến thông tin.\n` +
   `Những anh em nào tham gia trận league đầu phải có mặt tập trung 7g để điểm danh\n` +
   `Trường hợp ko kịp điểm danh lúc 7g nhưng vẫn vào kịp 7:30 hãy báo <@416841523473416192> hoặc <@584218775184736257> để nắm thông tin\n\n` +
-  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@416841523473416192>  sẽ sắp xếp mọi người lưu phiên vào nhé` +
-  `\n<!-- GVG_PING -->`;
+  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@416841523473416192>  sẽ sắp xếp mọi người lưu phiên vào nhé`;
 
 // ─── Parsing helpers ───────────────────────────────────────
 
