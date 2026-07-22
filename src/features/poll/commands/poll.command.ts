@@ -2,6 +2,7 @@
 
 import {
   ChatInputCommandInteraction,
+  Message,
   MessageFlags,
   SlashCommandBuilder,
   TextChannel,
@@ -13,11 +14,8 @@ import {
   POLL_CHANNEL_ID,
   POLL_TIMEZONE,
 } from "../../../shared/config";
-import {
-  buildPollTitle,
-  getCurrentPollWeek,
-  POLL_ANSWERS,
-} from "../domain/pollWeek";
+import { buildPollTitle, getCurrentPollWeek } from "../domain/pollWeek";
+import { createPollsCore } from "../application/pollScheduler";
 
 /**
  * Build a Discord message URL from guild, channel, and message IDs.
@@ -97,34 +95,39 @@ export async function handlePollCreate(
   }
 
   try {
-    // Create Saturday poll with 2 options and duration until Sunday 23:59
-    const saturdayPoll = await channel.send({
-      poll: {
-        question: { text: buildPollTitle("saturday", week.saturday) },
-        answers: POLL_ANSWERS,
-        duration: week.durationHours,
-        allowMultiselect: false,
-      },
-    });
+    const [ok, detail] = await createPollsCore("manual");
 
-    // Create Sunday poll with same options and duration
-    const sundayPoll = await channel.send({
-      poll: {
-        question: { text: buildPollTitle("sunday", week.sunday) },
-        answers: POLL_ANSWERS,
-        duration: week.durationHours,
-        allowMultiselect: false,
-      },
-    });
+    if (!ok) {
+      await interaction.editReply(`Không thể tạo poll: ${detail}`);
+      return;
+    }
 
-    await interaction.editReply(
-      [
-        `Đã tạo poll GVG tuần hiện tại trong <#${channel.id}>.`,
-        `T7: ${buildMessageUrl(interaction.guildId, channel.id, saturdayPoll.id)}`,
-        `CN: ${buildMessageUrl(interaction.guildId, channel.id, sundayPoll.id)}`,
-        `Múi giờ poll: \`${POLL_TIMEZONE}\`.`,
-      ].join("\n"),
-    );
+    // Fetch the newly created polls to build links
+    const messages = await channel.messages.fetch({ limit: 5 });
+    const saturdayTitle = buildPollTitle("saturday", week.saturday);
+    const sundayTitle = buildPollTitle("sunday", week.sunday);
+
+    let saturdayMsg: Message | undefined;
+    let sundayMsg: Message | undefined;
+
+    for (const [, message] of messages) {
+      if (message.poll?.question?.text === saturdayTitle) saturdayMsg = message;
+      if (message.poll?.question?.text === sundayTitle) sundayMsg = message;
+    }
+
+    const lines = [
+      `Đã tạo poll GVG tuần hiện tại trong <#${channel.id}>.`,
+    ];
+
+    if (saturdayMsg) {
+      lines.push(`T7: ${buildMessageUrl(interaction.guildId, channel.id, saturdayMsg.id)}`);
+    }
+    if (sundayMsg) {
+      lines.push(`CN: ${buildMessageUrl(interaction.guildId, channel.id, sundayMsg.id)}`);
+    }
+    lines.push(`Múi giờ poll: \`${POLL_TIMEZONE}\`.`);
+
+    await interaction.editReply(lines.join("\n"));
   } catch (error) {
     console.error("Failed to create polls", error);
     await interaction.editReply(
