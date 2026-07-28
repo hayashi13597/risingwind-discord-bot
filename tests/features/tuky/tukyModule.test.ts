@@ -1,7 +1,7 @@
 // tests/features/tuky/tukyModule.test.ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { tukyModule, handleAutoReply } from "../../../src/features/tuky";
+import { tukyModule, handleAutoReply, isChannelSilentForHours } from "../../../src/features/tuky";
 
 test("tukyModule has valid name and handlers", () => {
   assert.equal(tukyModule.name, "tuky");
@@ -24,4 +24,30 @@ test("handleAutoReply ignores bot messages", async () => {
 
   const handled = await handleAutoReply(mockMessage, mockContext);
   assert.equal(handled, false);
+});
+
+test("isChannelSilentForHours returns true when last message is older than 3 hours", async () => {
+  const fourHoursAgo = Date.now() - 4 * 60 * 60 * 1000;
+  const mockChannel: any = {
+    messages: {
+      fetch: async () => ({
+        first: () => ({ createdTimestamp: fourHoursAgo }),
+      }),
+    },
+  };
+  const isSilent = await isChannelSilentForHours(mockChannel, 3);
+  assert.equal(isSilent, true);
+});
+
+test("isChannelSilentForHours returns false when last message is within 3 hours", async () => {
+  const oneHourAgo = Date.now() - 1 * 60 * 60 * 1000;
+  const mockChannel: any = {
+    messages: {
+      fetch: async () => ({
+        first: () => ({ createdTimestamp: oneHourAgo }),
+      }),
+    },
+  };
+  const isSilent = await isChannelSilentForHours(mockChannel, 3);
+  assert.equal(isSilent, false);
 });

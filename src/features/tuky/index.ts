@@ -28,6 +28,28 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
+ * Checks if a text channel has been silent (no new messages) for at least `requiredSilentHours` hours.
+ */
+export async function isChannelSilentForHours(
+  channel: TextChannel,
+  requiredSilentHours: number = 3,
+): Promise<boolean> {
+  try {
+    const recentMessages = await channel.messages.fetch({ limit: 1 });
+    const lastMsg = recentMessages.first();
+    if (!lastMsg) {
+      return true; // No messages in channel -> considered silent
+    }
+    const msDiff = Date.now() - lastMsg.createdTimestamp;
+    const hoursDiff = msDiff / (1000 * 60 * 60);
+    return hoursDiff >= requiredSilentHours;
+  } catch (err) {
+    console.error("[TukyModule] Failed to check channel silence:", err);
+    return false;
+  }
+}
+
+/**
  * Execute the 2-bot ping-pong drama sequence in a text channel.
  */
 export async function runDramaSequence(
@@ -62,7 +84,7 @@ export async function runDramaSequence(
         sentCount++;
       } else {
         // Fallback if secondary client channel missing
-        await channel.send(`[SecondaryBot]: ${turn.text}`);
+        await channel.send(`[Chị gái Guild War Dzu Nhỏ]: ${turn.text}`);
         sentCount++;
       }
       // Wait 2.5 seconds between replies for natural pacing
@@ -131,7 +153,7 @@ export async function handleTukyCommand(interaction: ChatInputCommandInteraction
       return;
     }
 
-    await interaction.editReply("🎭 Đang gọi Gemini AI soạn kịch bản drama tự kỷ...");
+    await interaction.editReply("🎭 Đang chuẩn bị kịch bản drama tự kỷ giữa Em Gái DzuTo & Chị Gái Dzu Nhỏ...");
 
     const result = await runDramaSequence(
       storedPrimaryClient,
@@ -235,7 +257,7 @@ export const tukyModule: BotModule = {
   scheduledJobs: [
     {
       name: "tuky.randomDrama",
-      cron: "0 */2 * * *", // Run every 2 hours check
+      cron: "0,30 * * * *", // Check every 30 minutes
       run: async (context) => {
         if (!configuredChannelId) return;
         const fetched = await context.primaryClient.channels
@@ -243,9 +265,9 @@ export const tukyModule: BotModule = {
           .catch(() => null);
 
         if (fetched instanceof TextChannel) {
-          // 40% chance every 2 hours to randomly trigger self-talk drama
-          if (Math.random() < 0.4) {
-            console.info("[TukyModule] Scheduled random drama triggered.");
+          const isSilent = await isChannelSilentForHours(fetched, 3);
+          if (isSilent) {
+            console.info("[TukyModule] Channel has been silent for >= 3 hours. Triggering drama.");
             await runDramaSequence(context.primaryClient, context.secondaryClient, fetched, 6);
           }
         }

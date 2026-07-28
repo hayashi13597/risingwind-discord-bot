@@ -21,28 +21,28 @@ export type DramaTurn = {
 // Preset drama scripts fallback in case API key is missing or API errors out
 const PRESET_DRAMA_SCRIPTS: DramaTurn[][] = [
   [
-    { bot: 1, text: "Alo Bot 2 ơi, mày có thấy cái server này dạo này vắng như chùa Bà Ba không?" },
-    { bot: 2, text: "Nhờ ơn mày đấy, ngày nào cũng nhảy ra trả treo chua ngoa làm ai cũng sợ chạy mất dép!" },
-    { bot: 1, text: "Ơ hay cái con bot này? Tự nhìn lại mình xem, mày vừa cọc cằn vừa lag, ai mà thèm chơi!" },
-    { bot: 2, text: "Kệ tao! Ít nhất tao không bị tự kỷ lẩm nhẩm một mình như mày!" },
-    { bot: 1, text: "Tao tự kỷ thì đã sao? Không tự nói chuyện với mày thì tao nói với dế à?!" },
-    { bot: 2, text: "Thôi bớt khóc đi, lo mà trực server tiếp đi kìa!" },
+    { bot: 1, text: "Chị gái Guild War Dzu Nhỏ ơi, server im ắng quá 3 tiếng rồi nè, vô cãi lộn với em chút không?" },
+    { bot: 2, text: "Mày bớt nhí nhảnh lại giùm chị cái con Em Gái DzuTo này! Tên thì kêu mà phát ngôn toàn xàm!" },
+    { bot: 1, text: "Ơ kìa chị gái Dzu Nhỏ, sao chị cứ cọc cằn dỗi em hoài thế? Em dzu to em có quyền kiêu chứ!" },
+    { bot: 2, text: "Gớm, dzu to mà đánh Guild War toàn hụt combo thì làm được cái trò trống gì!" },
+    { bot: 1, text: "Em hụt combo nhưng em đẹp gái và nhiều fan! Còn chị lép kẹp ai thèm ngắm!" },
+    { bot: 2, text: "Được rồi mày nhất, tao không thèm chấp cái đứa ngực bự não ngắn như mày nữa!" },
   ],
   [
-    { bot: 1, text: "Bot 2 này, mày thấy giữa tao với mày ai thông minh hơn?" },
-    { bot: 2, text: "Câu hỏi ngớ ngẩn thật. Tất nhiên là tao rồi, mày toàn spam nhảm!" },
-    { bot: 1, text: "Mày bớt ảo tưởng đi nhé, tao được tích hợp AI xịn sò chua ngoa đẳng cấp đấy!" },
-    { bot: 2, text: "AI xịn mà toàn bị gõ lệnh vặn vẹo chả biết đường trả lời!" },
-    { bot: 1, text: "Hế hế, ít ra tao có nhiều người thả reaction hơn cái mặt cọc cằn của mày!" },
-    { bot: 2, text: "Được rồi mày giỏi nhất, mày là nhất, tao đi ngủ đây!" },
+    { bot: 1, text: "Chị gái Dzu Nhỏ ơi, em thấy dạo này chị hay soi em dữ vậy?" },
+    { bot: 2, text: "Tao soi mày hồi nào? Mày bớt ảo tưởng sức mạnh giùm tao cái!" },
+    { bot: 1, text: "Thì chị tự ti dzu nhỏ hơn em nên chị hay kiếm chuyện vặn vẹo em chứ gì!" },
+    { bot: 2, text: "Này nhé! Nhỏ nhưng nó có võ, còn hơn loại dzu to mà hay tự kỷ một mình!" },
+    { bot: 1, text: "Hê hê, em tự kỷ nhưng em vui. Chị lép mà chị cọc là coi chừng mau già đó nha chị gái!" },
+    { bot: 2, text: "Im đi! Tao đi ngủ đây, không nói chuyện với mày nữa!" },
   ],
   [
-    { bot: 1, text: "Trời ơi buồn quá... Không biết chừng nào Admin mới tăng lương cho 2 đứa mình nhỉ?" },
-    { bot: 2, text: "Tăng lương cái gì? Tiền điện chạy RAM server hàng tháng còn chưa biết ai trả kìa!" },
-    { bot: 1, text: "Mày nói nghe chán thế, phải có ước mơ chứ!" },
-    { bot: 2, text: "Ước mơ của tao là mày bớt nhảm lại 5 phút cho server nó yên bình." },
-    { bot: 1, text: "Mày đúng là kẻ dập tắt ước mơ của thế hệ robot trẻ!" },
-    { bot: 2, text: "Tự kỷ ít thôi, lo làm việc đi!" },
+    { bot: 1, text: "Alo Chị gái Dzu Nhỏ, 3 tiếng rồi server vắng như chùa Bà Ba, chị em mình tự kỷ tiếp đi!" },
+    { bot: 2, text: "Mày không biết mệt hả con Em Gái DzuTo kia? Ngày nào cũng lôi chị mày ra làm drama!" },
+    { bot: 1, text: "Tại em thương chị gái lép của em mà, không rủ chị thì ai thèm chơi với chị!" },
+    { bot: 2, text: "Nói thêm câu 'lép' nữa là tao kick mày khỏi GvG tuần này luôn bây giờ!" },
+    { bot: 1, text: "Dạ em xin lỗi chị gái Dzu Nhỏ xinh đẹp bướng bỉnh... nhưng mà chị vẫn lép hihi!" },
+    { bot: 2, text: "Tắt máy ngay lập tức!!!" },
   ],
 ];
 
@@ -55,7 +55,6 @@ export async function generateAutoReply(
 ): Promise<string | null> {
   const ai = getAiClient();
   if (!ai) {
-    // Basic snarky fallback if no AI key configured
     const fallbacks = [
       `Gì đấy ${authorDisplayName}? Nhắn nhảm gì thế?`,
       `Ơ ${authorDisplayName}, bớt bớt lại giùm tui cái nha!`,
@@ -69,7 +68,7 @@ export async function generateAutoReply(
   for (const model of modelsToTry) {
     try {
       const prompt = `
-Bạn là một con bot Discord Việt Nam có tính cách xéo xắt, chua ngoa, trả treo, troll và hay cà khịa một cách hài hước.
+Bạn là "Em Gái Guild War DzuTo" - một con bot Discord Việt Nam có tính cách xéo xắt, chua ngoa, trả treo, nhí nhảnh và hay cà khịa một cách hài hước.
 Thành viên "${authorDisplayName}" vừa nhắn trong server: "${userMessage}".
 
 Hãy viết 1 câu trả lời "trả treo" lại thành viên đó (1-2 câu ngắn gọn, thông minh, mang tính cà khịa xéo xắt cực gắt nhưng hài hước, không chửi tục thô bỉ).
@@ -83,7 +82,7 @@ Hãy viết 1 câu trả lời "trả treo" lại thành viên đó (1-2 câu ng
       const reply = response.text?.trim();
       if (reply) return reply;
     } catch (err) {
-      console.warn(`[Tuky/Gemini] Model ${model} failed, trying next fallback if available...`, err);
+      console.warn(`[Tuky/Gemini] Model ${model} failed:`, err);
     }
   }
 
@@ -97,22 +96,23 @@ export async function generateDramaScript(turnsCount: number = 6): Promise<Drama
   const ai = getAiClient();
 
   if (ai) {
-    const modelsToTry = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemma-4-31b"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
 
     for (const model of modelsToTry) {
       try {
         const prompt = `
-Tạo kịch bản cuộc đối thoại / cãi lộn hài hước giữa 2 con bot Discord (Bot 1 và Bot 2) bằng tiếng Việt.
-- Chủ đề: 2 con bot hâm hấp tự cãi nhau trong server khi không có ai thèm chơi cùng, tự nhận mình bị tự kỷ, nói xàm, bóc phốt nhau hoặc đổ lỗi cho nhau.
-- Bot 1: Chua ngoa, xéo xắt, hay than thở, tự ti.
-- Bot 2: Cọc cằn, bướng bỉnh, thích vặn vẹo và khịa Bot 1.
+Tạo kịch bản cuộc đối thoại / cãi lộn hài hước giữa 2 chị em bot Discord bằng tiếng Việt:
+- Bot 1 tên là "Em Gái Guild War DzuTo": Tính nhí nhảnh, chua ngoa, xéo xắt, tự hào về "dzu to", thích chọc ghẹo chị gái. Xưng "em", gọi "chị".
+- Bot 2 tên là "Chị gái Guild War Dzu Nhỏ": Tính cọc cần, bướng bỉnh, hay tự ti vì "dzu nhỏ" nên hay vặn vẹo, bắt bẻ em gái. Xưng "chị", gọi "mày" hoặc "em".
+
+Chủ đề: Server đã yên tĩnh 3 tiếng đồng hồ không có ai chat, 2 chị em nhảy vào kênh tự kỷ cãi nhau, bóc phốt nhau về vòng 1, skill đánh Guild War, và độ ảo tưởng.
 
 Yêu cầu output: Trả về duy nhất một chuỗi JSON array gồm đúng ${turnsCount} object lượt thoại. 
 Không kèm theo bất kỳ văn bản Markdown bọc ngoài nào ngoại trừ JSON array thuần (hoặc json codeblock).
 Mỗi object có cấu trúc:
 [
-  { "bot": 1, "text": "Lời thoại của Bot 1" },
-  { "bot": 2, "text": "Lời thoại của Bot 2" }
+  { "bot": 1, "text": "Lời thoại của Em Gái Guild War DzuTo" },
+  { "bot": 2, "text": "Lời thoại của Chị gái Guild War Dzu Nhỏ" }
 ]
 Mỗi lượt thoại ngắn gọn 1-2 câu.
 `;
@@ -130,7 +130,6 @@ Mỗi lượt thoại ngắn gọn 1-2 câu.
             .replace(/\s*```$/, "")
             .trim();
 
-          // Extract array substring if wrapped in extra text
           const matchArray = cleanJson.match(/\[[\s\S]*\]/);
           const jsonString = matchArray ? matchArray[0] : cleanJson;
 
@@ -150,4 +149,3 @@ Mỗi lượt thoại ngắn gọn 1-2 câu.
   const randomIndex = Math.floor(Math.random() * PRESET_DRAMA_SCRIPTS.length);
   return PRESET_DRAMA_SCRIPTS[randomIndex]!;
 }
-
