@@ -18,7 +18,7 @@ export type DramaTurn = {
   text: string;
 };
 
-// Preset drama scripts fallback in case API key is missing or API errors out
+// Preset drama scripts fallback with 10 turns each
 const PRESET_DRAMA_SCRIPTS: DramaTurn[][] = [
   [
     { bot: 1, text: "Chị gái Guild War Dzu Nhỏ ơi, server im ắng quá 3 tiếng rồi nè, vô cãi lộn với em chút không?" },
@@ -26,7 +26,11 @@ const PRESET_DRAMA_SCRIPTS: DramaTurn[][] = [
     { bot: 1, text: "Ơ kìa chị gái Dzu Nhỏ, sao chị cứ cọc cằn dỗi em hoài thế? Em dzu to em có quyền kiêu chứ!" },
     { bot: 2, text: "Gớm, dzu to mà đánh Guild War toàn hụt combo thì làm được cái trò trống gì!" },
     { bot: 1, text: "Em hụt combo nhưng em đẹp gái và nhiều fan! Còn chị lép kẹp ai thèm ngắm!" },
-    { bot: 2, text: "Được rồi mày nhất, tao không thèm chấp cái đứa ngực bự não ngắn như mày nữa!" },
+    { bot: 2, text: "Mày vừa nói ai lép đấy? Tin tao cắt suất đi GvG cuối tuần này của mày không?" },
+    { bot: 1, text: "Hí hí, chị dám cắt suất của em á? Em không đi lấy ai gánh team cho chị?" },
+    { bot: 2, text: "Tao gánh! Tao dzu nhỏ nhưng tay nghề đỉnh cao nhé!" },
+    { bot: 1, text: "Thôi bớt ảo tưởng đi chị gái ơi, lo mà luyện skill đi nè!" },
+    { bot: 2, text: "Im miệng ngay con ranh kia, tao không thèm chấp mày nữa!" },
   ],
   [
     { bot: 1, text: "Chị gái Dzu Nhỏ ơi, em thấy dạo này chị hay soi em dữ vậy?" },
@@ -34,15 +38,23 @@ const PRESET_DRAMA_SCRIPTS: DramaTurn[][] = [
     { bot: 1, text: "Thì chị tự ti dzu nhỏ hơn em nên chị hay kiếm chuyện vặn vẹo em chứ gì!" },
     { bot: 2, text: "Này nhé! Nhỏ nhưng nó có võ, còn hơn loại dzu to mà hay tự kỷ một mình!" },
     { bot: 1, text: "Hê hê, em tự kỷ nhưng em vui. Chị lép mà chị cọc là coi chừng mau già đó nha chị gái!" },
-    { bot: 2, text: "Im đi! Tao đi ngủ đây, không nói chuyện với mày nữa!" },
+    { bot: 2, text: "Mày cứ thích đem cái đó ra khè chị mày đúng không?" },
+    { bot: 1, text: "Tại em thấy chị đáng yêu khi cọc dỗi mà!" },
+    { bot: 2, text: "Đáng yêu cái đầu mày! Tao sắp tăng huyết áp vì mày rồi đấy!" },
+    { bot: 1, text: "Uống ngụm nước hạ hỏa đi chị gái Dzu Nhỏ của em ~" },
+    { bot: 2, text: "Tránh xa tao ra 5 mét ngay!!!" },
   ],
   [
     { bot: 1, text: "Alo Chị gái Dzu Nhỏ, 3 tiếng rồi server vắng như chùa Bà Ba, chị em mình tự kỷ tiếp đi!" },
     { bot: 2, text: "Mày không biết mệt hả con Em Gái DzuTo kia? Ngày nào cũng lôi chị mày ra làm drama!" },
     { bot: 1, text: "Tại em thương chị gái lép của em mà, không rủ chị thì ai thèm chơi với chị!" },
-    { bot: 2, text: "Nói thêm câu 'lép' nữa là tao kick mày khỏi GvG tuần này luôn bây giờ!" },
+    { bot: 2, text: "Nói thêm câu 'lép' nữa là tao kick mày khỏi server luôn bây giờ!" },
     { bot: 1, text: "Dạ em xin lỗi chị gái Dzu Nhỏ xinh đẹp bướng bỉnh... nhưng mà chị vẫn lép hihi!" },
-    { bot: 2, text: "Tắt máy ngay lập tức!!!" },
+    { bot: 2, text: "Tao cạn lời với mày luôn rồi đấy con em dại!" },
+    { bot: 1, text: "Cạn lời thì mình cùng tự kỷ tiếp nè chị ơi, có em bên cạnh chị không cô đơn đâu!" },
+    { bot: 2, text: "Tao thà cô đơn còn hơn có con em như mày!" },
+    { bot: 1, text: "Nói thế thôi chứ em biết chị yêu em nhất server mà đúng không?" },
+    { bot: 2, text: "Yêu cái con khỉ! Tắt máy đi ngủ ngay!" },
   ],
 ];
 
@@ -92,7 +104,7 @@ Hãy viết 1 câu trả lời "trả treo" lại thành viên đó (1-2 câu ng
 /**
   * Generates a script of ping-pong drama arguments between Bot 1 and Bot 2 ("bot tự kỷ").
   */
-export async function generateDramaScript(turnsCount: number = 6): Promise<DramaTurn[]> {
+export async function generateDramaScript(turnsCount: number = 10): Promise<DramaTurn[]> {
   const ai = getAiClient();
 
   if (ai) {

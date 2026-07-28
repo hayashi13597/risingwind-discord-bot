@@ -56,7 +56,7 @@ export async function runDramaSequence(
   primaryClient: Client,
   secondaryClient: Client,
   channel: TextChannel,
-  turnsCount: number = 6,
+  turnsCount: number = 10,
 ): Promise<{ success: boolean; count: number; error?: string }> {
   if (isDramaRunning) {
     return { success: false, count: 0, error: "Drama đang diễn ra rồi!" };
@@ -99,6 +99,7 @@ export async function runDramaSequence(
     isDramaRunning = false;
   }
 }
+
 
 /**
  * Slash command definition for /tuky
@@ -159,7 +160,7 @@ export async function handleTukyCommand(interaction: ChatInputCommandInteraction
       storedPrimaryClient,
       storedSecondaryClient,
       interaction.channel,
-      6,
+      10,
     );
 
     if (result.success) {
@@ -268,10 +269,11 @@ export const tukyModule: BotModule = {
           const isSilent = await isChannelSilentForHours(fetched, 3);
           if (isSilent) {
             console.info("[TukyModule] Channel has been silent for >= 3 hours. Triggering drama.");
-            await runDramaSequence(context.primaryClient, context.secondaryClient, fetched, 6);
+            await runDramaSequence(context.primaryClient, context.secondaryClient, fetched, 10);
           }
         }
       },
     },
   ],
 };
+
