@@ -130,15 +130,11 @@ export function renderPingMessage(template: string, now: Date): string {
   return template.replace(/\[\s*\d{1,2}\/\d{1,2}\s*-\s*\d{1,2}\/\d{1,2}\s*\]/, `[ ${weekendRange} ]`);
 }
 
-// ─── Gemini AI & Bot Tự Kỷ ─────────────────────────────────
-export const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
-const TUKY_CHANNEL_ID_RAW = process.env.TUKY_CHANNEL_ID;
-
 // ─── Resolved exports ──────────────────────────────────────
 export const POLL_CHANNEL_ID = parseChannelId(POLL_CHANNEL_ID_RAW);
 export const PING_CHANNEL_ID = parseChannelId(PING_CHANNEL_ID_RAW);
-export const TUKY_CHANNEL_ID = parseChannelId(TUKY_CHANNEL_ID_RAW);
 export const ALLOWED_PING_WEEKDAYS = parsePingWeekdays(PING_WEEKDAYS_RAW);
+
 export const ALLOWED_PING_TIMES = parsePingTimes(PING_TIMES_RAW);
 export const PING_MESSAGE_TEMPLATE = resolvePingMessage(PING_MESSAGE_RAW);
 export const PING_DEDUP_WINDOW_MS = PING_DEDUP_WINDOW_RAW

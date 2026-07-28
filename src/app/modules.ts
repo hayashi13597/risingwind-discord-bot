@@ -8,7 +8,6 @@ import type { VoiceCoordinator } from "../features/voice/application/voiceCoordi
 import { antibangwModule } from "../features/antibangw";
 import { notificationsModule } from "../features/notifications";
 import { pollModule } from "../features/poll";
-import { tukyModule } from "../features/tuky";
 import { createVoiceModule } from "../features/voice";
 import { createHelpModule } from "../features/help";
 
@@ -20,9 +19,9 @@ export function createEnabledModules(options: {
     pollModule,
     antibangwModule,
     notificationsModule,
-    tukyModule,
     createVoiceModule({ getCoordinator: options.getVoiceCoordinator }),
     createHelpModule({ getModules: options.getModules }),
   ];
 }
+
 
