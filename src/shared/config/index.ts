@@ -32,8 +32,8 @@ export const DEFAULT_PING_MESSAGE =
   `Anh em vào mục <#1461714411361271828>  để điểm danh GVG vào T7 và CN nhé\n\n` +
   `Anh em <@&1444172594285907989>  điểm danh sớm để còn xếp đội hình và nghe phổ biến thông tin.\n` +
   `Những anh em nào tham gia trận league đầu phải có mặt tập trung 7g để điểm danh\n` +
-  `Trường hợp ko kịp điểm danh lúc 7g nhưng vẫn vào kịp 7:30 hãy báo <@1179444918440169557> hoặc <@584218775184736257> để nắm thông tin\n\n` +
-  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@584218775184736257>  sẽ sắp xếp mọi người lưu phiên vào nhé`;
+  `Trường hợp ko kịp điểm danh lúc 7g nhưng vẫn vào kịp 7:30 hãy báo <@1179444918440169557> hoặc <@1366296889007276132> để nắm thông tin\n\n` +
+  `Những anh em về muộn, muốn tham gia đánh GvG thì tick vào Ô đăng ký "Tham gia sau 8g", nếu có slot <@1366296889007276132>  sẽ sắp xếp mọi người lưu phiên vào nhé`;
 
 // ─── Parsing helpers ───────────────────────────────────────
 
@@ -62,7 +62,14 @@ export function parsePingTimes(value: string): Set<string> {
     if (parts.length !== 2) continue;
     const hour = parseInt(parts[0]!, 10);
     const minute = parseInt(parts[1]!, 10);
-    if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    if (
+      isNaN(hour) ||
+      isNaN(minute) ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59
+    ) {
       continue;
     }
     parsed.add(`${hour}:${minute}`);
@@ -127,7 +134,10 @@ export function renderPingMessage(template: string, now: Date): string {
   if (template.includes("{WEEKEND_RANGE}")) {
     return template.replace("{WEEKEND_RANGE}", weekendRange);
   }
-  return template.replace(/\[\s*\d{1,2}\/\d{1,2}\s*-\s*\d{1,2}\/\d{1,2}\s*\]/, `[ ${weekendRange} ]`);
+  return template.replace(
+    /\[\s*\d{1,2}\/\d{1,2}\s*-\s*\d{1,2}\/\d{1,2}\s*\]/,
+    `[ ${weekendRange} ]`,
+  );
 }
 
 // ─── Resolved exports ──────────────────────────────────────
